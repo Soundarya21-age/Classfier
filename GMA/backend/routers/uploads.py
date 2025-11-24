@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from database import get_db
 import models, schemas
@@ -165,3 +166,30 @@ async def update_upload(
     db.refresh(video)
     
     return schemas.VideoUpload.from_orm(video)
+
+@router.get("/{upload_id}/download")
+async def download_video(
+    upload_id: int,
+    doctor_id: int = Depends(get_doctor_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Download a video file with proper Content-Disposition header.
+    """
+    video = db.query(models.VideoUpload).filter(
+        models.VideoUpload.id == upload_id,
+        models.VideoUpload.doctor_id == doctor_id
+    ).first()
+    
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    if not os.path.exists(video.file_path):
+        raise HTTPException(status_code=404, detail="Video file not found on disk")
+    
+    return FileResponse(
+        path=video.file_path,
+        media_type='video/mp4',
+        filename=video.original_filename,
+        headers={"Content-Disposition": f"attachment; filename={video.original_filename}"}
+    )

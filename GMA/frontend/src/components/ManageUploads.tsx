@@ -139,6 +139,56 @@ export function ManageUploads({ onBack, onInstantBlindTest }: ManageUploadsProps
     }));
   };
 
+  // ✅ Handle video download
+  const handleDownloadVideo = async (video: Video) => {
+    if (!currentUser) {
+      toast.error('Not authenticated');
+      return;
+    }
+
+    try {
+      const token = await currentUser.getIdToken();
+      
+      // Use the backend download endpoint
+      const response = await fetch(
+        `http://localhost:8000/api/uploads/${video.id}/download`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to download video');
+      }
+
+      // Get the blob from response
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = video.original_filename;
+      
+      // Append to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Cleanup the URL object
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`Downloaded: ${video.original_filename}`);
+    } catch (error) {
+      console.error('Error downloading video:', error);
+      toast.error('Failed to download video');
+    }
+  };
+
   // ✅ Get status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -473,7 +523,10 @@ export function ManageUploads({ onBack, onInstantBlindTest }: ManageUploadsProps
                             <Download className="w-4 h-4 mr-2" />
                             Instant Blind Test
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-gray-300 hover:bg-gray-800 hover:text-white cursor-pointer">
+                          <DropdownMenuItem
+                            onClick={() => handleDownloadVideo(video)}
+                            className="text-gray-300 hover:bg-gray-800 hover:text-white cursor-pointer"
+                          >
                             <Download className="w-4 h-4 mr-2" />
                             Download Video
                           </DropdownMenuItem>
@@ -585,7 +638,12 @@ export function ManageUploads({ onBack, onInstantBlindTest }: ManageUploadsProps
                 >
                   Close
                 </Button>
-                <Button className="flex-1 bg-gradient-to-r from-[#00D9FF] to-[#0099FF] hover:from-[#00BFFF] hover:to-[#0088EE] text-white rounded-xl">
+                <Button 
+                  onClick={() => {
+                    if (selectedVideo) handleDownloadVideo(selectedVideo);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-[#00D9FF] to-[#0099FF] hover:from-[#00BFFF] hover:to-[#0088EE] text-white rounded-xl"
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Download Video
                 </Button>
