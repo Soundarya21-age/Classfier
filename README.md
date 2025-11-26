@@ -39,10 +39,14 @@ pip install pandas
 pip install matplotlib
 pip install scikit-learn
 
+Step 4: 
+bash
+For node modules: npm install
 For firebase authentication
 In Frontend: npm install firebase
 In Backend: pip install firebase-admin
 
-To RUN:
+Step 5:
+To RUN bash: 
 Frontend : npm run dev
 Backend: uvicorn main:app --reload --host 0.0.0.0 --port 8000
