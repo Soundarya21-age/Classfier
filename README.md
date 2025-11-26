@@ -39,7 +39,7 @@ pip install pandas
 pip install matplotlib
 pip install scikit-learn
 
-For firebase authenticatio
+For firebase authentication
 In Frontend: npm install firebase
 In Backend: pip install firebase-admin
 
