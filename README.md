@@ -47,12 +47,6 @@ In Frontend: npm install firebase
 In Backend: pip install firebase-admin
 
 Step 5:
-Add this files for firebase authentication credentials:
-Frontend: .env.local
-Backend: .env and serviceAccountKey
-
-
-Step 5:
 To RUN bash: 
 Frontend : npm run dev
 Backend: uvicorn main:app --reload --host 0.0.0.0 --port 8000
